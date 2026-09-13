@@ -46,14 +46,14 @@ async def health():
     return {
         "status": "ok",
         "service": "AgriCure Multi-Crop API",
-        "model_loaded": classifier.model is not None,
+        "model_loaded": classifier.is_ready(),
         "supported_classes": len(classifier.classes),
         "crops": ["Apple", "Bell Pepper", "Cherry", "Corn", "Grape", "Potato", "Strawberry", "Tomato"]
     }
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(file: UploadFile = File(...)):
-    if classifier.model is None:
+    if not classifier.is_ready():
         raise HTTPException(status_code=503, detail="Model is not ready.")
 
     # Validate and load image
