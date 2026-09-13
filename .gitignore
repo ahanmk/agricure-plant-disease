@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Training datasets (keep repository light for GitHub & deployment)
+dataset/
+training/PlantVillage/
+temp_pv/
+archive.zip
+*.h5
+
+# Legacy potato-only models (not needed for deployment)
+saved_model/1/
+saved_model/2/
+saved_model/3/
+
+# Local environments
+.venv/
+venv/
+ENV/
+env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Streamlit local secrets
+.streamlit/secrets.toml
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
