@@ -6,13 +6,13 @@ class LeafDetector:
     Visual gatekeeper to verify whether an uploaded image contains plant/crop leaf foliage.
     Checks chromaticity (ExG / HSV plant-tissue color space) and natural texture.
     """
-    def __init__(self, min_green_ratio: float = 0.03):
+    def __init__(self, min_green_ratio: float = 0.005):
         self.min_green_ratio = min_green_ratio
 
     def analyze_image_foliage(self, image: Image.Image) -> dict:
         """
         Evaluates visual plant leaf characteristics using Excess Green Index (ExG)
-        and color distribution in HSV.
+        and color distribution in HSV. Rejects non-plant surfaces such as skin tones and blue objects.
         """
         rgb = np.array(image.convert("RGB"), dtype=np.float32)
         hsv = np.array(image.convert("HSV"), dtype=np.float32)
@@ -27,10 +27,10 @@ class LeafDetector:
         tot = r + g + b + 1e-5
         exg = (2.0 * g - r - b) / tot
 
-        # True green vegetation mask:
-        # Green hue (30 to 118 out of 255), adequate saturation, and positive ExG
-        green_mask = (h >= 30) & (h <= 118) & (s >= 0.14) & (v >= 0.10) & (exg > 0.02)
-        green_ratio = float(np.mean(green_mask))
+        # Plant foliage mask:
+        # Hue 20 to 125 (green, olive, yellow), adequate saturation/value, ExG > -0.05, and r - g < 45
+        foliage_mask = (h >= 20) & (h <= 125) & (s >= 0.08) & (v >= 0.08) & (exg > -0.05) & ((r - g) < 45)
+        green_ratio = float(np.mean(foliage_mask))
 
         # Check for noise / high-frequency non-natural patterns
         diff_h = np.abs(np.diff(rgb, axis=0))

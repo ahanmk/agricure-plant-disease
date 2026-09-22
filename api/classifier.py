@@ -2,7 +2,11 @@ import os
 import json
 import numpy as np
 from PIL import Image
-import keras
+try:
+    from tensorflow import keras
+except ImportError:
+    import keras
+
 
 MODEL_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "saved_model", "multicrop_model.keras")

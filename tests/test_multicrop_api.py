@@ -39,7 +39,7 @@ def run_tests():
             disease = data["disease"]
             conf = data["confidence"]
             print(f"   {name:<20} -> is_leaf: {is_leaf}, crop: {crop}, disease: {disease}, conf: {conf}%")
-            assert is_leaf == True
+            assert is_leaf is True
             assert data["advisory"] is not None
 
         print("\n3. Non-Leaf Gatekeeper Tests:")
@@ -50,7 +50,7 @@ def run_tests():
         buf.seek(0)
         r1 = client.post("/predict", files={"file": ("car.jpg", buf, "image/jpeg")}).json()
         print(f"   Blue Object  -> is_leaf: {r1['is_leaf']} | Msg: {r1['message']}")
-        assert r1["is_leaf"] == False
+        assert r1["is_leaf"] is False
 
         # Skin / portrait tone
         skin = Image.fromarray(np.zeros((224, 224, 3), dtype=np.uint8) + np.array([220, 175, 140], dtype=np.uint8))
@@ -59,7 +59,7 @@ def run_tests():
         buf.seek(0)
         r2 = client.post("/predict", files={"file": ("face.jpg", buf, "image/jpeg")}).json()
         print(f"   Face / Skin  -> is_leaf: {r2['is_leaf']} | Msg: {r2['message']}")
-        assert r2["is_leaf"] == False
+        assert r2["is_leaf"] is False
 
         # Noise
         noise = Image.fromarray(np.uint8(np.random.randint(0, 256, (224, 224, 3))))
@@ -68,9 +68,36 @@ def run_tests():
         buf.seek(0)
         r3 = client.post("/predict", files={"file": ("noise.jpg", buf, "image/jpeg")}).json()
         print(f"   Random Noise -> is_leaf: {r3['is_leaf']} | Msg: {r3['message']}")
-        assert r3["is_leaf"] == False
+        assert r3["is_leaf"] is False
 
-    print("\n>>> ALL END-TO-END VERIFICATION CHECKS PASSED WITH EXCELLENCE! <<<")
+        print("\n4. Input Validation & Error Handling Tests:")
+
+        # Unsupported extension (.txt)
+        res_ext = client.post("/predict", files={"file": ("test.txt", b"some text", "text/plain")})
+        print(f"   Unsupported ext (.txt) -> Status: {res_ext.status_code}, Detail: {res_ext.json().get('detail')}")
+        assert res_ext.status_code == 400
+
+        # Empty file (0 bytes)
+        res_empty = client.post("/predict", files={"file": ("empty.jpg", b"", "image/jpeg")})
+        print(f"   Empty file (0 bytes)   -> Status: {res_empty.status_code}, Detail: {res_empty.json().get('detail')}")
+        assert res_empty.status_code == 400
+
+        # Oversized file (>10 MB)
+        big_content = b"0" * (10 * 1024 * 1024 + 100)
+        res_big = client.post("/predict", files={"file": ("large.png", big_content, "image/png")})
+        print(f"   Oversized file (>10MB) -> Status: {res_big.status_code}, Detail: {res_big.json().get('detail')}")
+        assert res_big.status_code == 400
+
+        # RGBA PNG Image Mode Conversion Test
+        rgba_img = Image.new("RGBA", (224, 224), (50, 180, 50, 255))
+        rgba_buf = io.BytesIO()
+        rgba_img.save(rgba_buf, format="PNG")
+        rgba_buf.seek(0)
+        res_rgba = client.post("/predict", files={"file": ("rgba_leaf.png", rgba_buf, "image/png")})
+        print(f"   RGBA PNG Conversion    -> Status: {res_rgba.status_code}, is_leaf: {res_rgba.json().get('is_leaf')}")
+        assert res_rgba.status_code == 200
+
+    print("\n>>> ALL END-TO-END & ROBUSTNESS VERIFICATION CHECKS PASSED WITH EXCELLENCE! <<<")
 
 if __name__ == "__main__":
     run_tests()

@@ -4,56 +4,66 @@ An end-to-end intelligent agricultural diagnosis system powered by Deep Learning
 
 ---
 
-## Architecture Overview
+## ⚡ Quick Start: Running Locally
 
-- **Frontend (`frontend/`)**: Streamlit web application with an agricultural theme, frosted-glass cards, and a farming landscape background.
-- **Backend (`backend/`)**: FastAPI REST API providing a two-tier leaf gatekeeper, deep-learning crop disease inference, and agronomical advisory lookups from `data/advisory.json`.
-- **Model**: MobileNetV2 feature extractor trained on a balanced 31-class PlantVillage dataset, reaching **88.82% test accuracy**.
+### 1. Start the Active FastAPI Backend
+From the project root directory, launch the active FastAPI server:
+```powershell
+uvicorn api.main:app --reload --port 8000
+```
+*Health Check*: Access `http://localhost:8000/health` to confirm the model and API are online.
 
-### Supported Crops & Conditions (31 Classes)
-- ** Apple**: *Apple scab*, *Black rot*, *Cedar apple rust*, *Healthy*
-- ** Bell Pepper**: *Bacterial spot*, *Healthy*
-- ** Cherry**: *Powdery mildew*, *Healthy*
-- ** Corn (Maize)**: *Cercospora leaf spot (Gray leaf spot)*, *Common rust*, *Northern Leaf Blight*, *Healthy*
-- ** Grape**: *Black rot*, *Esca (Black Measles)*, *Leaf blight (Isariopsis)*, *Healthy*
-- ** Potato**: *Early blight*, *Late blight*, *Healthy*
-- ** Strawberry**: *Leaf scorch*, *Healthy*
-- ** Tomato**: *Bacterial spot*, *Early blight*, *Late blight*, *Leaf Mold*, *Septoria leaf spot*, *Spider mites*, *Target Spot*, *Yellow Leaf Curl Virus*, *Mosaic virus*, *Healthy*
+### 2. Start the Active Streamlit Frontend
+In a separate terminal window, launch the Streamlit frontend:
+```powershell
+streamlit run frontend/app.py
+```
+*Web Application*: Access `http://localhost:8501` in your browser.
 
 ---
 
+## 📋 Image Upload Restrictions & Technical Limits
 
+* **Supported File Formats**: `JPG`, `JPEG`, `PNG`
+* **Maximum File Size Limit**: `10 MB`
+* **Image Mode Compatibility**: Automatic conversion of `RGBA`, `LA`, `P`, `L`, and `CMYK` modes to 3-channel `RGB`.
+* **Sanitized Error Handling**: Server logs detailed Python exception tracebacks internally while client interfaces display safe, actionable error guidance without exposing stack traces.
+
+---
+
+## 📱 Mobile (Android Browser) Testing Checklist
+
+To verify mobile usability on Android phone browsers (e.g. Chrome Mobile / Firefox Mobile):
+
+1. **Responsive Viewport Layout**: Open DevTools Mobile Emulator (360px - 412px width) or test directly on an Android device. Ensure no horizontal scrolling or clipped cards occur.
+2. **Camera & File Selection**: Tap the file uploader and verify Android native options appear (*Camera* to capture a live photo, or *Files/Gallery* to select a saved photo).
+3. **Touch Targets**: Confirm all interactive controls (Crop Selector, File Uploader, and "Analyze Leaf Image" button) have a minimum tap height of 48px.
+4. **Result Clarity**: Ensure crop diagnosis banner, confidence percentage bar, and management recommendations stack vertically without overlapping.
+5. **Error Notification**: Test uploading an invalid file format or corrupted image and verify the clear error card displays cleanly on mobile screens.
 
 ---
 
 ## 📁 Repository Structure
 
 ```
-├── backend/                  # Standalone FastAPI service for cloud hosting
-│   ├── main.py               # REST API endpoints (/health, /predict, CORS)
+├── api/                      # Active local FastAPI backend service
+│   ├── main.py               # Active REST API endpoints (/health, /predict, CORS) & validation
 │   ├── classifier.py         # MobileNetV2 model inference & class mapping
 │   ├── leaf_detector.py      # Two-tier foliage gatekeeper (ExG / chromaticity)
 │   ├── advisory.py           # Agronomical advisory lookup service
-│   ├── schemas.py            # Pydantic request & response models
-│   ├── Procfile              # Cloud process declaration for web workers
-│   ├── requirements.txt      # Lightweight backend dependencies (tensorflow-cpu)
-│   ├── data/
-│   │   └── advisory.json     # Curated treatment & fertilizer knowledge base
-│   └── saved_model/
-│       ├── multicrop_model.keras   # Trained 31-class neural network (13.1 MB)
-│       └── multicrop_classes.json  # Class label index
+│   └── schemas.py            # Pydantic request & response models
 │
-├── frontend/                 # Streamlit web application
-│   ├── app.py                # UI with hero banner, leaf preview & 5 advisory tabs
-│   ├── requirements.txt      # Fast frontend dependencies (streamlit, requests)
-│   └── assets/
-│       └── farmer_bg.jpg     # High-res agricultural field background image
+├── frontend/                 # Active Streamlit web application
+│   ├── app.py                # Mobile-first, emoji-free professional UI
+│   ├── requirements.txt      # Frontend dependencies (streamlit, requests)
+│   └── assets/               # Assets directory
 │
+├── backend/                  # Preserved standalone PaaS deployment bundle
 ├── tests/
-│   └── test_multicrop_api.py # Automated integration tests for all 8 crops & non-leaves
-│
+│   └── test_multicrop_api.py # Automated integration & input validation tests
+├── saved_model/              # Master trained neural network weights & class index
 ├── data/
 │   └── advisory.json         # Master advisory dataset
-├── .gitignore                # Excludes large raw datasets and cache files
-└── README.md                 # Project documentation & deployment guide
+├── requirements.txt          # Complete local environment requirements
+└── README.md                 # Project documentation & setup guide
 ```
