@@ -4,23 +4,6 @@ An end-to-end intelligent agricultural diagnosis system powered by Deep Learning
 
 ---
 
-## ⚡ Quick Start: Running Locally
-
-### 1. Start the Active FastAPI Backend
-From the project root directory, launch the active FastAPI server:
-```powershell
-uvicorn api.main:app --reload --port 8000
-```
-*Health Check*: Access `http://localhost:8000/health` to confirm the model and API are online.
-
-### 2. Start the Active Streamlit Frontend
-In a separate terminal window, launch the Streamlit frontend:
-```powershell
-streamlit run frontend/app.py
-```
-*Web Application*: Access `http://localhost:8501` in your browser.
-
----
 
 ## 📋 Image Upload Restrictions & Technical Limits
 
